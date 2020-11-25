@@ -282,7 +282,7 @@ class GraphRequest
             $this->_getRequestUrl(), 
             array_merge($this->guzzle_options, [
                 RequestOptions::BODY => $this->requestBody
-            ]
+            ])
         );
 
         // Check to see if returnType is a stream, if so return it immediately
