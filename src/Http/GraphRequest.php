@@ -280,9 +280,8 @@ class GraphRequest
         $result = $client->request(
             $this->requestType, 
             $this->_getRequestUrl(), 
-            [
-                'body' => $this->requestBody,
-                'timeout' => $this->timeout
+            array_merge($this->guzzle_options, [
+                RequestOptions::BODY => $this->requestBody
             ]
         );
 
@@ -325,10 +324,9 @@ class GraphRequest
         $promise = $client->requestAsync(
             $this->requestType,
             $this->_getRequestUrl(),
-            [
-                'body' => $this->requestBody,
-                'timeout' => $this->timeout
-            ]
+            array_merge($this->guzzle_options, [
+                RequestOptions::BODY => $this->requestBody
+            ])
         )->then(
             // On success, return the result/response
             function ($result) {
@@ -385,10 +383,10 @@ class GraphRequest
             $client->request(
                 $this->requestType, 
                 $this->_getRequestUrl(), 
-                [
-                    'body' => $this->requestBody,
-                    'sink' => $file
-                ]
+                array_merge($this->guzzle_options, [
+                    RequestOptions::BODY => $this->requestBody,
+                    RequestOptions::SINK => $file
+                ])
             );
             if(is_resource($file)){
                 fclose($file);
