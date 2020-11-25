@@ -18,6 +18,7 @@
 namespace Microsoft\Graph\Http;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\RequestOptions;
 use Microsoft\Graph\Core\GraphConstants;
 use Microsoft\Graph\Exception\GraphException;
 
@@ -87,12 +88,6 @@ class GraphRequest
     */
     protected $returnType;
     /**
-    * The timeout, in seconds
-    *
-    * @var string
-    */
-    protected $timeout;
-    /**
     * The proxy port to use. Null to disable
     *
     * @var string
@@ -104,6 +99,12 @@ class GraphRequest
     * @var bool
     */
     protected $http_errors;
+    /**
+     * Client options to set in the Guzzle client instance
+     * 
+     * @var array
+     */
+    protected $guzzle_options;
 
     /**
     * Constructs a new Graph Request object
@@ -122,6 +123,7 @@ class GraphRequest
         $this->endpoint = $endpoint;
         $this->accessToken = $accessToken;
         $this->http_errors = true;
+        $this->guzzle_options = array();
 
         if (!$this->accessToken) {
             throw new GraphException(GraphConstants::NO_ACCESS_TOKEN);
@@ -129,7 +131,6 @@ class GraphRequest
 
         $this->baseUrl = $baseUrl;
         $this->apiVersion = $apiVersion;
-        $this->timeout = 0;
         $this->headers = $this->_getDefaultHeaders();
         $this->proxyPort = $proxyPort;
     }
@@ -144,6 +145,19 @@ class GraphRequest
     public function setHttpErrors($http_errors)
     {
         $this->http_errors = $http_errors;
+        return $this;
+    }
+
+    /**
+     * Sets options on the used Guzzle client
+     * 
+     * @param array $options
+     * 
+     * @return GraphRequest object
+     */
+    public function setGuzzleOptions($options)
+    {
+        $this->guzzle_options = $options;
         return $this;
     }
 
@@ -239,10 +253,11 @@ class GraphRequest
     * @param string $timeout The timeout in seconds
     * 
     * @return GraphRequest object
+    * @deprecated Use setGuzzleOptions
     */
     public function setTimeout($timeout)
     {
-        $this->timeout = $timeout;
+        $this->guzzle_options[RequestOptions::TIMEOUT] = $timeout;
         return $this;
     }
 
@@ -477,12 +492,12 @@ class GraphRequest
     { 
         $clientSettings = [
             'base_uri' => $this->baseUrl,
-            'http_errors' => $this->http_errors,
-            'headers' => $this->headers
+            RequestOptions::HTTP_ERRORS => $this->http_errors,
+            RequestOptions::HEADERS => $this->headers
         ];
         if ($this->proxyPort !== null) {
-            $clientSettings['verify'] = false;
-            $clientSettings['proxy'] = $this->proxyPort;
+            $clientSettings[RequestOptions::VERIFY] = false;
+            $clientSettings[RequestOptions::PROXY] = $this->proxyPort;
         } 
         $client = new Client($clientSettings);
         
