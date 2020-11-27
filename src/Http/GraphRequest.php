@@ -107,6 +107,11 @@ class GraphRequest
     protected $guzzle_options;
 
     /**
+     * Guzzle client handler
+     */
+    protected $handler;
+
+    /**
     * Constructs a new Graph Request object
     *
     * @param string $requestType The HTTP method to use, e.g. "GET" or "POST"
@@ -124,6 +129,7 @@ class GraphRequest
         $this->accessToken = $accessToken;
         $this->http_errors = true;
         $this->guzzle_options = array();
+        $this->handler = null;
 
         if (!$this->accessToken) {
             throw new GraphException(GraphConstants::NO_ACCESS_TOKEN);
@@ -258,6 +264,16 @@ class GraphRequest
     public function setTimeout($timeout)
     {
         $this->guzzle_options[RequestOptions::TIMEOUT] = $timeout;
+        return $this;
+    }
+
+    /**
+     * Set Guzzle handler
+     * 
+     * @return GraphRequest object
+     */
+    public function setHandler($handler) {
+        $this->handler = $handler;
         return $this;
     }
 
@@ -496,7 +512,10 @@ class GraphRequest
         if ($this->proxyPort !== null) {
             $clientSettings[RequestOptions::VERIFY] = false;
             $clientSettings[RequestOptions::PROXY] = $this->proxyPort;
-        } 
+        }
+        if ($this->handler !== null) {
+            $clientSettings['handler'] = $this->handler;
+        }
         $client = new Client($clientSettings);
         
         return $client;
